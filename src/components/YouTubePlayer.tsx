@@ -210,6 +210,33 @@ const YouTubePlayer = ({
   const timeUpdateIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [isApiReady, setIsApiReady] = useState(false);
 
+  /**
+   * Clears the time update interval.
+   */
+  const clearTimeUpdateInterval = useCallback(() => {
+    if (timeUpdateIntervalRef.current) {
+      clearInterval(timeUpdateIntervalRef.current);
+      timeUpdateIntervalRef.current = null;
+    }
+  }, []);
+
+  /**
+   * Sets up an interval to periodically call onTimeUpdate with the current video time.
+   * This is active only when the video is playing.
+   */
+  const setupTimeUpdateInterval = useCallback(() => {
+    clearTimeUpdateInterval();
+    timeUpdateIntervalRef.current = setInterval(() => {
+      if (
+        playerInstanceRef.current &&
+        typeof playerInstanceRef.current.getCurrentTime === "function"
+      ) {
+        const currentTime = playerInstanceRef.current.getCurrentTime();
+        onTimeUpdate(currentTime);
+      }
+    }, 3000); // Update every 3 seconds
+  }, [onTimeUpdate, clearTimeUpdateInterval]);
+
   useEffect(() => {
     /**
      * Initializes the YouTube player once the API is ready.
@@ -258,8 +285,7 @@ const YouTubePlayer = ({
              * @param event - The onStateChange event object.
              */
             onStateChange: (event: YTOnStateChangeEvent) => {
-              const currentTime =
-                playerInstanceRef.current?.getCurrentTime() ?? 0;
+              const currentTime = event.target.getCurrentTime() ?? 0;
               if (event.data === YTPlayerState.PLAYING) {
                 onPlayerStateChange(true, currentTime);
                 setupTimeUpdateInterval();
@@ -300,34 +326,14 @@ const YouTubePlayer = ({
         playerInstanceRef.current = null;
       }
     };
-  }, [isApiReady, videoId, startTimeSeconds]); // Key dependencies for re-initialization
-
-  /**
-   * Clears the time update interval.
-   */
-  const clearTimeUpdateInterval = useCallback(() => {
-    if (timeUpdateIntervalRef.current) {
-      clearInterval(timeUpdateIntervalRef.current);
-      timeUpdateIntervalRef.current = null;
-    }
-  }, []);
-
-  /**
-   * Sets up an interval to periodically call onTimeUpdate with the current video time.
-   * This is active only when the video is playing.
-   */
-  const setupTimeUpdateInterval = useCallback(() => {
-    clearTimeUpdateInterval();
-    timeUpdateIntervalRef.current = setInterval(() => {
-      if (
-        playerInstanceRef.current &&
-        typeof playerInstanceRef.current.getCurrentTime === "function"
-      ) {
-        const currentTime = playerInstanceRef.current.getCurrentTime();
-        onTimeUpdate(currentTime);
-      }
-    }, 3000); // Update every 3 seconds
-  }, [onTimeUpdate, clearTimeUpdateInterval]);
+  }, [
+    isApiReady,
+    videoId,
+    startTimeSeconds,
+    clearTimeUpdateInterval,
+    setupTimeUpdateInterval,
+    onPlayerStateChange,
+  ]); // Key dependencies for re-initialization
 
   // Effect for cleaning up interval on unmount explicitly.
   useEffect(() => {

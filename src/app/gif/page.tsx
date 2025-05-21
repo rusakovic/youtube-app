@@ -59,7 +59,7 @@ const GifPage = () => {
         }}
       >
         <Image
-          src="/funny.gif" // Assuming funny.gif is in the public folder
+          src="/gif/funny.gif" // Assuming funny.gif is in the public folder
           alt="Funny GIF"
           layout="fill"
           objectFit="contain"
