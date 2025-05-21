@@ -3,14 +3,13 @@
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getVideoData, saveVideoData, VideoData } from "@/store/videoStore";
+import { Suspense } from "react";
 
 /**
- * GIF page of the application.
- * Displays a funny GIF and a button to navigate back to the video page,
- * passing the youtubeID as a query parameter.
- * Updates the system time for the current video before navigating.
+ * Content of the GIF page, responsible for displaying the GIF and handling navigation.
+ * This component uses client-side hooks like useSearchParams.
  */
-const GifPage = () => {
+const GifPageContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -81,6 +80,25 @@ const GifPage = () => {
         Back to Video
       </button>
     </div>
+  );
+};
+
+/**
+ * GIF page of the application.
+ * Wraps the main content in a Suspense boundary to handle client-side rendering
+ * of components using hooks like useSearchParams.
+ */
+const GifPage = () => {
+  return (
+    <Suspense
+      fallback={
+        <p style={{ textAlign: "center", marginTop: "50px" }}>
+          Loading GIF page...
+        </p>
+      }
+    >
+      <GifPageContent />
+    </Suspense>
   );
 };
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import YouTubePlayer from "@/components/YouTubePlayer";
 import { getVideoData, saveVideoData, VideoData } from "@/store/videoStore";
@@ -11,7 +11,7 @@ import Link from "next/link";
  * Displays the YouTube video player based on the youtubeID query parameter.
  * Handles playback time calculation, state persistence, and navigation.
  */
-const VideoPage = () => {
+const VideoPageContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [currentVideoId, setCurrentVideoId] = useState<string | null>(null);
@@ -147,6 +147,24 @@ const VideoPage = () => {
         Go to GIF Page
       </Link>
     </div>
+  );
+};
+
+/**
+ * Video page of the application.
+ * Wraps the main content in a Suspense boundary.
+ */
+const VideoPage = () => {
+  return (
+    <Suspense
+      fallback={
+        <p style={{ textAlign: "center", marginTop: "50px" }}>
+          Loading video page...
+        </p>
+      }
+    >
+      <VideoPageContent />
+    </Suspense>
   );
 };
 

@@ -8,14 +8,13 @@ import {
   getYouTubeIdFromUrl,
   getVideoData,
 } from "@/store/videoStore";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 
 /**
- * Home page of the application.
- * Displays a form to enter a YouTube video URL.
- * The form can be pre-filled using a 'url' query parameter.
+ * Content of the Home page, responsible for the YouTube URL form and navigation.
+ * This component uses client-side hooks like useSearchParams.
  */
-const HomePage = () => {
+const HomePageContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [initialUrl, setInitialUrl] = useState<string>("");
@@ -69,6 +68,24 @@ const HomePage = () => {
       </h1>
       <YouTubeForm onSave={handleSaveUrl} initialUrl={initialUrl} />
     </div>
+  );
+};
+
+/**
+ * Home page of the application.
+ * Wraps the main content in a Suspense boundary.
+ */
+const HomePage = () => {
+  return (
+    <Suspense
+      fallback={
+        <p style={{ textAlign: "center", marginTop: "50px" }}>
+          Loading home page...
+        </p>
+      }
+    >
+      <HomePageContent />
+    </Suspense>
   );
 };
 
