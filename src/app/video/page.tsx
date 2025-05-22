@@ -18,6 +18,7 @@ const VideoPageContent = () => {
   const [playerData, setPlayerData] = useState<VideoData | null>(null);
   const [calculatedStartTime, setCalculatedStartTime] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [currentTime, setCurrentTime] = useState<number>(0);
 
   useEffect(() => {
     const videoIdFromParams = searchParams.get("youtubeID");
@@ -50,11 +51,35 @@ const VideoPageContent = () => {
   }, [searchParams, router]);
 
   /**
+   * Save the current video position when navigating away from the page
+   */
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (playerData && currentVideoId && currentTime > 0) {
+        const newData: VideoData = {
+          ...playerData,
+          lastKnownVideoTime: currentTime,
+          lastKnownSystemTime: Date.now(),
+        };
+        saveVideoData(currentVideoId, newData);
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      handleBeforeUnload(); // Save position when component unmounts
+    };
+  }, [playerData, currentVideoId, currentTime]);
+
+  /**
    * Handles updating the video progress in localStorage for the current video ID.
    * @param currentTimeSeconds - The current playback time of the video in seconds.
    */
   const handleTimeUpdate = useCallback(
     (currentTimeSeconds: number): void => {
+      setCurrentTime(currentTimeSeconds);
       if (playerData && currentVideoId) {
         const newData: VideoData = {
           ...playerData,

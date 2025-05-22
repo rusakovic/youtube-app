@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { getVideoData, saveVideoData, VideoData } from "@/store/videoStore";
 import { Suspense } from "react";
 
 /**
@@ -15,20 +14,12 @@ const GifPageContent = () => {
 
   /**
    * Handles the back button click.
-   * Retrieves the youtubeID from query params. If found, updates its lastKnownSystemTime
-   * in localStorage, then navigates back to the video page with that youtubeID.
+   * Retrieves the youtubeID from query params. If found, navigates back to the video page with that youtubeID.
+   * The video time position has already been saved periodically during playback on the video page.
    */
   const handleBackToVideo = (): void => {
     const currentVideoId = searchParams.get("youtubeID");
     if (currentVideoId) {
-      const currentVideoData = getVideoData(currentVideoId);
-      if (currentVideoData) {
-        const updatedData: VideoData = {
-          ...currentVideoData,
-          lastKnownSystemTime: Date.now(), // Update system time to now
-        };
-        saveVideoData(currentVideoId, updatedData);
-      }
       router.push(`/video?youtubeID=${currentVideoId}`);
     } else {
       // Fallback if no youtubeID is found, though ideally this shouldn't happen

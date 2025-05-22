@@ -234,7 +234,7 @@ const YouTubePlayer = ({
         const currentTime = playerInstanceRef.current.getCurrentTime();
         onTimeUpdate(currentTime);
       }
-    }, 3000); // Update every 3 seconds
+    }, 1000); // Update every 1 second instead of 3 seconds
   }, [onTimeUpdate, clearTimeUpdateInterval]);
 
   useEffect(() => {
